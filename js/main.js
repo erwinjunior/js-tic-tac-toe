@@ -1,3 +1,4 @@
+import { TURN } from './constants.js';
 import {
     getCellElementAtIdx,
     getCellElementList,
@@ -8,14 +9,41 @@ import {
 /**
  * Global variables
  */
-let currentTurn = 'cross';
+let currentTurn = TURN.CROSS;
 let isGameEnded = false;
 let cellValues = new Array(9).fill('');
 
-console.log(getCellElementAtIdx(4));
-console.log(getCurrentTurnElement());
-console.log(getCellElementList());
-console.log(getGameStatusElement);
+const toggleTurn = () => {
+    currentTurn = currentTurn === TURN.CROSS ? TURN.CIRCLE : TURN.CROSS;
+    const currentTurnElement = getCurrentTurnElement();
+
+    if (currentTurnElement) {
+        currentTurnElement.classList.remove(TURN.CROSS, TURN.CIRCLE);
+        currentTurnElement.classList.add(currentTurn);
+    }
+};
+
+const handleCellClick = (cell, index) => {
+    const isClicked =
+        cell.classList.contains(TURN.CIRCLE) || cell.classList.contains(TURN.CROSS);
+    if (isClicked) return;
+    // set selected sell
+    cell.classList.add(currentTurn);
+
+    // toggle turn
+    toggleTurn();
+};
+
+const initCellElements = () => {
+    const cellElements = getCellElementList();
+    cellElements.forEach((cell, index) => {
+        cell.addEventListener('click', () => {
+            handleCellClick(cell, index);
+        });
+    });
+};
+
+initCellElements();
 
 /**
  * TODOs
