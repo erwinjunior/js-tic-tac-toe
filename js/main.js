@@ -1,16 +1,18 @@
-import { TURN } from './constants.js';
+import { CELL_VALUE, GAME_STATUS, TURN } from './constants.js';
 import {
     getCellElementAtIdx,
     getCellElementList,
     getCurrentTurnElement,
     getGameStatusElement,
+    getReplayButtonElement,
 } from './selectors.js';
 
+import { checkGameStatus } from './utils.js';
 /**
  * Global variables
  */
 let currentTurn = TURN.CROSS;
-let isGameEnded = false;
+let gameStatus = GAME_STATUS.PLAYING;
 let cellValues = new Array(9).fill('');
 
 const toggleTurn = () => {
@@ -23,12 +25,54 @@ const toggleTurn = () => {
     }
 };
 
+const updateGameStatus = (status) => {
+    gameStatus = status;
+
+    const gameStatusElement = getGameStatusElement();
+    gameStatusElement.textContent = gameStatus;
+};
+
+const showReplayButton = () => {
+    const replayButton = getReplayButtonElement();
+    replayButton.classList.add('show');
+};
+
+const highlightWinCells = (winPositions) => {
+    if (!Array.isArray(winPositions) || winPositions.length !== 3) return;
+    winPositions.forEach((position) => {
+        const cell = getCellElementAtIdx(position);
+        cell.classList.add('win');
+    });
+};
+
 const handleCellClick = (cell, index) => {
     const isClicked =
         cell.classList.contains(TURN.CIRCLE) || cell.classList.contains(TURN.CROSS);
-    if (isClicked) return;
+
+    const isEndGame = gameStatus !== GAME_STATUS.PLAYING;
+    if (isEndGame || isClicked) return;
     // set selected sell
     cell.classList.add(currentTurn);
+
+    // update cell values
+    cellValues[index] =
+        currentTurn === TURN.CIRCLE ? CELL_VALUE.CIRCLE : CELL_VALUE.CROSS;
+
+    // check game status
+    const game = checkGameStatus(cellValues);
+    switch (game.status) {
+        case GAME_STATUS.ENDED:
+            updateGameStatus(game.status);
+            showReplayButton();
+            break;
+        case GAME_STATUS.X_WIN:
+        case GAME_STATUS.O_WIN:
+            updateGameStatus(game.status);
+            showReplayButton();
+            highlightWinCells(game.winPositions);
+            break;
+        default:
+    }
 
     // toggle turn
     toggleTurn();
