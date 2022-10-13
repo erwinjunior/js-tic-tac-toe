@@ -101,6 +101,8 @@ const resetGame = () => {
     gameStatus = GAME_STATUS.PLAYING;
     cellValues = cellValues.map((cell) => (cell = ''));
 
+    updateGameStatus(gameStatus);
+
     // reset current turn
     const currentTurnElement = getCurrentTurnElement();
     setCurrentTurn(currentTurnElement);
